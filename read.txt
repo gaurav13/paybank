@@ -1,0 +1,2 @@
+command is use to run this project
+npx live-server client

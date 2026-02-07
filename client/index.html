@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pay By Bank - XRPL Testnet</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --pay-bg: #f3f6fb;
+      --pay-card: #ffffff;
+      --pay-shadow: 0 18px 48px rgba(16, 24, 40, 0.08);
+      --pay-radius: 22px;
+    }
+
+    body {
+      background: radial-gradient(1200px 600px at 10% -10%, #eef3ff 0%, transparent 60%),
+        radial-gradient(1000px 500px at 110% 10%, #e6fff6 0%, transparent 50%),
+        var(--pay-bg);
+      min-height: 100vh;
+      font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    .pay-card {
+      background: var(--pay-card);
+      border: 1px solid #e6eaf2;
+      border-radius: var(--pay-radius);
+      box-shadow: var(--pay-shadow);
+    }
+
+    .pay-pill {
+      border-radius: 999px;
+      padding: 0.35rem 0.8rem;
+      font-size: 0.78rem;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .btn-soft {
+      border-radius: 999px;
+      padding: 0.7rem 1.5rem;
+      font-weight: 600;
+      box-shadow: 0 12px 30px rgba(13, 110, 253, 0.25);
+    }
+
+    .soft-input {
+      border-radius: 14px;
+    }
+
+    .view {
+      transition: opacity 0.2s ease;
+    }
+
+    .success-icon {
+      font-size: 3.2rem;
+      color: #198754;
+    }
+
+    .hash-box {
+      background: #f5f7fb;
+      border-radius: 14px;
+      padding: 0.75rem 1rem;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 0.85rem;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <div class="container min-vh-100 d-flex align-items-center justify-content-center py-5">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-5">
+      <div class="pay-card p-4 p-md-5">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+          <div>
+            <div class="text-uppercase text-muted small">Pay by Bank</div>
+            <h3 class="mb-0">XRPL Testnet Payment</h3>
+          </div>
+          <span class="badge text-bg-primary pay-pill">Testnet</span>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <div>
+            <div class="text-muted small">Connected Wallet</div>
+            <div class="d-flex align-items-center gap-2">
+              <div id="wallet-address" class="fw-semibold">—</div>
+              <a id="wallet-explorer-link" class="text-muted small text-decoration-none" href="#" target="_blank" rel="noreferrer">View on Testnet</a>
+            </div>
+            <div class="text-muted small">Balance</div>
+            <div id="wallet-balance" class="fw-semibold">—</div>
+          </div>
+          <button id="disconnect-btn" class="btn btn-outline-secondary btn-sm">Switch Wallet</button>
+        </div>
+
+        <div id="view-selection" class="view d-none">
+          <div class="text-center mb-4">
+            <div class="text-muted small">Payment Method</div>
+            <div class="fs-5 fw-semibold">Select Payment Method</div>
+          </div>
+          <div class="list-group gap-2">
+            <div class="list-group-item rounded-4 p-3 opacity-50">
+              <div class="fw-semibold">Pay by Bank (JPY)</div>
+              <div class="text-muted small">Powered by BANKEY</div>
+            </div>
+            <button id="pay-xrp-btn" type="button" class="list-group-item list-group-item-action rounded-4 p-3 border-primary">
+              <div class="fw-semibold">Pay by XRP</div>
+              <div class="text-muted small">Instant Settlement via XRPL</div>
+            </button>
+          </div>
+        </div>
+
+        <div id="view-onboarding" class="view d-none">
+          <div class="text-center mb-4">
+            <div class="text-muted small">Welcome</div>
+            <div class="fs-5 fw-semibold">Create or import your Testnet wallet</div>
+          </div>
+          <div class="d-grid gap-2">
+            <button id="generate-wallet-btn" class="btn btn-primary btn-soft">Generate New Wallet</button>
+            <button id="show-import-btn" class="btn btn-outline-primary btn-soft">Import Secret Key</button>
+          </div>
+          <div id="import-panel" class="mt-3 d-none">
+            <label for="import-seed" class="form-label text-muted small">Testnet Secret Key / Seed</label>
+            <textarea id="import-seed" class="form-control soft-input" rows="2" placeholder="s████..."></textarea>
+            <button id="import-submit-btn" class="btn btn-secondary btn-soft w-100 mt-3">Use This Secret Key</button>
+          </div>
+          <div class="text-muted small mt-3 text-center">We never send your secret key to any server.</div>
+        </div>
+
+        <div id="view-details" class="view d-none">
+          <div class="mb-3">
+            <div class="text-muted small">Merchant</div>
+            <div class="fs-5 fw-semibold">Army Store</div>
+          </div>
+          <div class="mb-3">
+            <div class="text-muted small">Amount</div>
+            <div id="amount-display" class="display-6 fw-bold">148.50 XRP</div>
+            <input id="amount-input" type="number" min="0" step="0.000001" class="form-control form-control-lg soft-input d-none mt-2" aria-label="Manual amount in XRP">
+            <button id="edit-amount-btn" class="btn btn-link text-decoration-none text-primary p-0 mt-2">Edit Amount Manually</button>
+          </div>
+          <div class="mb-4">
+            <div class="d-flex justify-content-between text-muted small">
+              <span>Payment Reference</span>
+              <span>PB-3902</span>
+            </div>
+            <div class="d-flex justify-content-between text-muted small">
+              <span>Fee</span>
+              <span>0.00001 XRP</span>
+            </div>
+            <div class="d-flex justify-content-between text-muted small">
+              <span>Bank</span>
+              <span class="d-inline-flex align-items-center gap-1">
+                <span id="bank-status-dot" class="badge rounded-pill bg-secondary" style="width:8px;height:8px;"></span>
+                <span id="bank-status-text">Disconnected</span>
+              </span>
+            </div>
+          </div>
+          <button id="authorize-btn" class="btn btn-primary w-100 btn-soft">Authorize Payment</button>
+          <div class="text-muted small mt-3">No account number required. Details are pre-filled by Pay By Bank.</div>
+        </div>
+
+        <div id="view-processing" class="view d-none text-center">
+          <div class="spinner-border text-primary mb-3" role="status" aria-label="Verifying"></div>
+          <div class="fw-semibold">Verifying with XRPL Testnet...</div>
+          <div class="text-muted small mt-2">Securely confirming the transaction on-chain.</div>
+        </div>
+
+        <div id="view-success" class="view d-none">
+          <div class="text-center">
+            <i class="bi bi-check-circle-fill success-icon"></i>
+            <div class="fw-semibold mt-3">Success! Transaction Validated</div>
+          </div>
+          <div class="mt-4">
+            <div class="text-muted small">Digital Receipt</div>
+            <div class="hash-box mt-2">
+              <div class="d-flex justify-content-between small">
+                <span class="text-muted">Status</span>
+                <span class="fw-semibold text-success">Payment Verified</span>
+              </div>
+              <div class="d-flex justify-content-between small mt-2">
+                <span class="text-muted">Timestamp</span>
+                <span id="receipt-time">—</span>
+              </div>
+              <div class="d-flex justify-content-between small mt-2">
+                <span class="text-muted">To</span>
+                <span id="receipt-to">Army Store</span>
+              </div>
+              <div class="d-flex justify-content-between small mt-2">
+                <span class="text-muted">From</span>
+                <span id="receipt-from">—</span>
+              </div>
+              <div class="d-flex justify-content-between small mt-2">
+                <span class="text-muted">Amount</span>
+                <span id="receipt-amount">—</span>
+              </div>
+              <div class="d-flex justify-content-between small mt-2">
+                <span class="text-muted">Network Fee</span>
+                <span id="receipt-fee">—</span>
+              </div>
+              <div class="mt-3 d-flex align-items-center justify-content-between gap-2">
+                <a id="receipt-hash-link" class="text-muted small text-decoration-none" href="#" target="_blank" rel="noreferrer">
+                  Transaction Hash: <span id="receipt-hash">—</span>
+                </a>
+                <button id="copy-hash-btn" type="button" class="btn btn-link text-muted p-0" aria-label="Copy transaction hash">
+                  <i class="bi bi-copy"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          <button id="done-btn" class="btn btn-outline-primary w-100 btn-soft mt-4">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
