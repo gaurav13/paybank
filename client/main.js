@@ -34,7 +34,7 @@ const copyHashBtn = document.getElementById("copy-hash-btn");
 
 const TESTNET_WSS = "wss://s.altnet.rippletest.net:51233";
 const MERCHANT_ADDRESS = "rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe";
-const PAYMENT_AMOUNT_XRP = "148.50";
+const PAYMENT_AMOUNT_XRP = "20.50";
 
 let alertEl;
 let walletBalanceXrp = null;
@@ -93,10 +93,12 @@ function setBankStatus(isConnected) {
     bankStatusDot.classList.remove("bg-secondary");
     bankStatusDot.classList.add("bg-success");
     bankStatusText.textContent = "Connected";
+    disconnectBtn.classList.remove("d-none");
   } else {
     bankStatusDot.classList.remove("bg-success");
     bankStatusDot.classList.add("bg-secondary");
     bankStatusText.textContent = "Disconnected";
+    disconnectBtn.classList.add("d-none");
   }
 }
 
@@ -130,7 +132,7 @@ function formatXrpFromDrops(xrpl, drops) {
 
 function resetReceipt() {
   receiptTimeEl.textContent = "—";
-  receiptToEl.textContent = "Army Store";
+  receiptToEl.textContent = "PayBank Store";
   receiptFromEl.textContent = "—";
   receiptAmountEl.textContent = "—";
   receiptFeeEl.textContent = "—";
@@ -396,6 +398,7 @@ setAmountDisplay(PAYMENT_AMOUNT_XRP);
 showAmountInput(false);
 if (!getUserSeed()) {
   resetWalletInfo();
+  showView(onboardingView);
 } else {
   refreshWalletInfo();
 }
