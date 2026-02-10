@@ -109,6 +109,27 @@
           </div>
         </div>
 
+        <div id="view-wallet-created" class="view d-none">
+          <div class="text-center mb-4">
+            <div class="text-muted small">Wallet Created</div>
+            <div class="fs-5 fw-semibold">Save your wallet details</div>
+          </div>
+          <div class="mb-3">
+            <div class="text-muted small">Classic Address</div>
+            <div id="created-address" class="hash-box mt-1">—</div>
+            <button id="copy-address-btn" class="btn btn-outline-primary btn-sm mt-2">Copy Address</button>
+          </div>
+          <div class="mb-3">
+            <div class="text-muted small">Secret Key / Seed</div>
+            <div id="created-seed" class="hash-box mt-1">—</div>
+            <button id="copy-seed-btn" class="btn btn-outline-primary btn-sm mt-2">Copy Secret Key</button>
+          </div>
+          <div class="alert alert-warning small">
+            Never share your secret key. Store it offline. Anyone with this key can access your funds.
+          </div>
+          <button id="wallet-continue-btn" class="btn btn-primary w-100 btn-soft" disabled>I've copied both, continue</button>
+        </div>
+
         <div id="view-onboarding" class="view d-none">
           <div class="text-center mb-4">
             <div class="text-muted small">Welcome</div>
@@ -130,6 +151,11 @@
           <div class="mb-3">
             <div class="text-muted small">Merchant</div>
             <div class="fs-5 fw-semibold">PayBank Store</div>
+            <div class="text-muted small mt-2">Merchant Wallet</div>
+            <div class="d-flex align-items-center gap-2">
+              <div id="merchant-wallet" class="text-muted small">—</div>
+              <a id="merchant-wallet-link" class="text-muted small text-decoration-none" href="#" target="_blank" rel="noreferrer">View on Testnet</a>
+            </div>
           </div>
           <div class="mb-3">
             <div class="text-muted small">Amount</div>

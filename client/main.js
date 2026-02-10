@@ -2,6 +2,7 @@ import { loadXrpl } from "./utils/xrpl.js";
 
 const onboardingView = document.getElementById("view-onboarding");
 const selectionView = document.getElementById("view-selection");
+const walletCreatedView = document.getElementById("view-wallet-created");
 const detailsView = document.getElementById("view-details");
 const processingView = document.getElementById("view-processing");
 const successView = document.getElementById("view-success");
@@ -23,6 +24,13 @@ const amountDisplayEl = document.getElementById("amount-display");
 const amountInputEl = document.getElementById("amount-input");
 const editAmountBtn = document.getElementById("edit-amount-btn");
 const payXrpBtn = document.getElementById("pay-xrp-btn");
+const merchantWalletEl = document.getElementById("merchant-wallet");
+const merchantWalletLinkEl = document.getElementById("merchant-wallet-link");
+const createdAddressEl = document.getElementById("created-address");
+const createdSeedEl = document.getElementById("created-seed");
+const copyAddressBtn = document.getElementById("copy-address-btn");
+const copySeedBtn = document.getElementById("copy-seed-btn");
+const walletContinueBtn = document.getElementById("wallet-continue-btn");
 const receiptTimeEl = document.getElementById("receipt-time");
 const receiptToEl = document.getElementById("receipt-to");
 const receiptFromEl = document.getElementById("receipt-from");
@@ -39,10 +47,13 @@ const PAYMENT_AMOUNT_XRP = "20.50";
 let alertEl;
 let walletBalanceXrp = null;
 let currentAmountXrp = PAYMENT_AMOUNT_XRP;
+let addressCopied = false;
+let seedCopied = false;
 
 function showView(view) {
   onboardingView.classList.add("d-none");
   selectionView.classList.add("d-none");
+  walletCreatedView.classList.add("d-none");
   detailsView.classList.add("d-none");
   processingView.classList.add("d-none");
   successView.classList.add("d-none");
@@ -146,6 +157,23 @@ function resetWalletInfo() {
   walletExplorerLinkEl.href = "#";
   setBankStatus(false);
   walletBalanceXrp = null;
+}
+
+function setMerchantWalletInfo() {
+  merchantWalletEl.textContent = MERCHANT_ADDRESS;
+  merchantWalletLinkEl.href = `https://testnet.xrpl.org/accounts/${MERCHANT_ADDRESS}`;
+}
+
+function resetCreatedWalletView() {
+  addressCopied = false;
+  seedCopied = false;
+  walletContinueBtn.disabled = true;
+  copyAddressBtn.classList.remove("text-success");
+  copySeedBtn.classList.remove("text-success");
+}
+
+function updateContinueState() {
+  walletContinueBtn.disabled = !(addressCopied && seedCopied);
 }
 
 async function refreshWalletInfo() {
@@ -311,13 +339,16 @@ generateWalletBtn.addEventListener("click", async () => {
     });
 
     setUserSeed(wallet.seed);
+    createdAddressEl.textContent = wallet.classicAddress;
+    createdSeedEl.textContent = wallet.seed;
+    resetCreatedWalletView();
     importSeedInput.value = "";
     importPanel.classList.add("d-none");
     resetReceipt();
     setAmountDisplay(PAYMENT_AMOUNT_XRP);
     showAmountInput(false);
     await refreshWalletInfo();
-    showView(selectionView);
+    showView(walletCreatedView);
   } catch (error) {
     showError(error?.message || "Failed to create or fund wallet.");
     showView(onboardingView);
@@ -357,6 +388,33 @@ importSubmitBtn.addEventListener("click", async () => {
   }
 });
 
+copyAddressBtn.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(createdAddressEl.textContent.trim());
+    addressCopied = true;
+    copyAddressBtn.classList.add("text-success");
+    updateContinueState();
+  } catch (_) {
+    showError("Unable to copy address. Please copy manually.");
+  }
+});
+
+copySeedBtn.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(createdSeedEl.textContent.trim());
+    seedCopied = true;
+    copySeedBtn.classList.add("text-success");
+    updateContinueState();
+  } catch (_) {
+    showError("Unable to copy secret key. Please copy manually.");
+  }
+});
+
+walletContinueBtn.addEventListener("click", () => {
+  clearError();
+  showView(selectionView);
+});
+
 copyHashBtn.addEventListener("click", async () => {
   const hash = receiptHashEl.textContent.trim();
   if (!hash || hash === "—") return;
@@ -389,6 +447,7 @@ disconnectBtn.addEventListener("click", () => {
   clearUserSeed();
   resetReceipt();
   resetWalletInfo();
+  resetCreatedWalletView();
   showView(onboardingView);
 });
 
@@ -396,6 +455,8 @@ showView(selectionView);
 resetReceipt();
 setAmountDisplay(PAYMENT_AMOUNT_XRP);
 showAmountInput(false);
+setMerchantWalletInfo();
+resetCreatedWalletView();
 if (!getUserSeed()) {
   resetWalletInfo();
   showView(onboardingView);
